@@ -21,8 +21,8 @@ const checkContainerStatus = async (containerId: string, accessToken: string): P
 };
 
 const waitForContainerReady = async (containerId: string, accessToken: string) => {
-    const MAX_RETRIES = 5;
-    const RETRY_DELAY_MS = 60000;
+    const MAX_RETRIES = 20;
+    const RETRY_DELAY_MS = 3000;
 
     for (let i = 0; i < MAX_RETRIES; i++) {
         const status = await checkContainerStatus(containerId, accessToken);
