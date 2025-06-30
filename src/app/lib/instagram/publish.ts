@@ -1,4 +1,5 @@
 import { PostProps, MediaObject, PostType } from "@/interface/post";
+import { uploadFile } from "../files";
 
 const API_VERSION = "v20.0";
 const BASE_URL = `https://graph.instagram.com/${API_VERSION}`;
@@ -58,10 +59,14 @@ const createMediaContainer = async (
 ): Promise<string> => {
     const params = new URLSearchParams({ access_token: accessToken });
 
+    const tempUrl = await uploadFile(media.url);
+
+    console.log('tempUrl', tempUrl);
+
     if (media.type === 'VIDEO') {
-        params.append('video_url', media.url);
+        params.append('video_url', tempUrl);
     } else {
-        params.append('image_url', media.url);
+        params.append('image_url', tempUrl);
     }
 
     if (postTypeForSingleMedia && !isCarouselItem) {
@@ -85,7 +90,7 @@ const createMediaContainer = async (
     if (!response.ok) {
         const errorData = await response.json();
         console.error("Instagram API Error (createMediaContainer):", errorData);
-        throw new Error(`Could not create media container for ${media.url}. Status: ${response.status}`);
+        throw new Error(`Could not create media container for ${tempUrl}. Status: ${response.status}`);
     }
 
     const data = await response.json();
