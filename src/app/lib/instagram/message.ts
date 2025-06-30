@@ -1,6 +1,7 @@
 import { IgApiClient } from 'instagram-private-api';
 import { promises as fs } from 'fs';
 import path from 'path';
+import { allowedUser } from './constant';
 
 const SESSION_PATH = path.join(process.cwd(), 'ig-session.json');
 const ig = new IgApiClient();
@@ -31,11 +32,13 @@ async function login() {
 }
 
 const processMessageItem = (item: any) => {
-    const message: { type: string; content: any; senderId: string; timestamp: string } = {
+    // console.log(item);
+    const message: { type: string; content: any; senderId: string; timestamp: string; media_id: string } = {
         type: item.item_type,
         content: `Unsupported message type: ${item.item_type}`,
         senderId: item.user_id.toString(),
         timestamp: new Date(parseInt(item.timestamp) / 1000).toISOString(),
+        media_id: item.item_id,
     };
 
     // console.log(item.item_type);
@@ -80,6 +83,7 @@ const processMessageItem = (item: any) => {
                 message.content = {
                     media_url: item.clip.clip.video_versions?.[0]?.url,
                     thumbnail_url: item.clip.clip.image_versions2?.candidates[0]?.url,
+                    caption: item.clip.clip.caption?.text || '',
                 };
             }
             break;
@@ -123,31 +127,38 @@ const processMessageItem = (item: any) => {
     return message;
 };
 
-export const getDirectMessages = async () => {
+export const getDirectMessages = async (limit: number = 10, type: 'all' | 'clip' = 'all') => {
     await login();
     const directInboxFeed = ig.feed.directInbox();
     const threads = await directInboxFeed.items();
 
     const currentUser = await ig.account.currentUser();
 
-    return threads.map(thread => {
-        const userMap = new Map<string, string>();
-        thread.users.forEach(user => userMap.set(user.pk.toString(), user.username));
-        userMap.set(currentUser.pk.toString(), currentUser.username);
+    return threads
+        .filter(thread => thread.users.some(user => allowedUser.includes(user.username)))
+        .map(thread => {
+            const userMap = new Map<string, string>();
+            thread.users.forEach(user => userMap.set(user.pk.toString(), user.username));
+            userMap.set(currentUser.pk.toString(), currentUser.username);
 
-        const messages = thread.items.slice(0, 10).map(item => {
-             const processedMessage = processMessageItem(item);
-             return {
-                 ...processedMessage,
-                 sender: userMap.get(processedMessage.senderId) || `User ID: ${processedMessage.senderId}`,
-             }
-        }).reverse();
+            const messages = thread.items.slice(0, limit).filter(item => {
+                if (type === 'clip') {
+                    return item.item_type === 'clip';
+                }
+                return true;
+            }).map(item => {
+                const processedMessage = processMessageItem(item);
+                return {
+                    ...processedMessage,
+                    sender: userMap.get(processedMessage.senderId) || `User ID: ${processedMessage.senderId}`,
+                }
+            }).reverse();
 
-        return {
-            threadId: thread.thread_id,
-            threadTitle: thread.thread_title,
-            users: thread.users.map(user => user.username),
-            messages
-        }
-    });
+            return {
+                threadId: thread.thread_id,
+                threadTitle: thread.thread_title,
+                users: thread.users.map(user => user.username),
+                messages
+            }
+        });
 };
