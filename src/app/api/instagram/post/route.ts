@@ -1,6 +1,9 @@
+'use server';
+
 import { NextResponse } from "next/server";
 import { PostProps } from "@/interface/post";
 import publish from "@/app/lib/instagram/publish";
+
 
 export async function POST(request: Request) {
     try {

@@ -2,6 +2,8 @@ import { IgApiClient } from 'instagram-private-api';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { PeekProps } from '@/interface/peek';
+// @ts-ignore
+import { instagramIdToUrlSegment, urlSegmentToInstagramId } from 'instagram-id-to-url-segment';
 
 // Define the path for storing the session
 const SESSION_PATH = path.join(process.cwd(), 'ig-session.json');
@@ -24,6 +26,8 @@ export interface MediaItem {
     username: string;
     caption: string;
     children?: ChildMediaItem[];
+    likes: number;
+    comments: number;
 }
 
 const ig = new IgApiClient();
@@ -97,6 +101,8 @@ const peek = async ({ username, filter, limit }: PeekProps): Promise<MediaItem[]
                 username: item.user.username,
                 caption: item.caption?.text || '',
                 children,
+                likes: item.like_count || 0,
+                comments: item.comment_count || 0
             };
         }).filter((item): item is MediaItem => item !== null);
 
@@ -122,4 +128,53 @@ const peek = async ({ username, filter, limit }: PeekProps): Promise<MediaItem[]
     return mediaItems;
 }
 
-export default peek;
+const peekPost = async (postId: string): Promise<MediaItem> => {
+    if (!process.env.IG_USERNAME || !process.env.IG_PASSWORD) {
+        throw new Error("Instagram username or password is not available in environment variables.");
+    }
+
+    await login();
+
+    const mediaId = urlSegmentToInstagramId(postId);
+
+    const post = await ig.media.info(mediaId.toString());
+    
+    // Map the Instagram API response to our MediaItem interface
+    const item: any = post.items[0]; // Get the first (and typically only) item, cast to any for flexibility
+    
+    let media_type: 'IMAGE' | 'VIDEO' | 'CAROUSEL_ALBUM';
+    switch (item.media_type) {
+        case 1: media_type = 'IMAGE'; break;
+        case 2: media_type = 'VIDEO'; break;
+        case 8: media_type = 'CAROUSEL_ALBUM'; break;
+        default: throw new Error(`Unsupported media type: ${item.media_type}`);
+    }
+
+    let children: ChildMediaItem[] | undefined;
+    if (media_type === 'CAROUSEL_ALBUM' && item.carousel_media) {
+        children = item.carousel_media.map((child: any): ChildMediaItem => ({
+            id: child.id,
+            media_type: child.media_type === 1 ? 'IMAGE' : 'VIDEO',
+            media_url: child.media_type === 2 && child.video_versions?.length ? child.video_versions[0].url : child.image_versions2.candidates[0].url,
+            thumbnail_url: child.image_versions2.candidates[0].url,
+        }));
+    }
+
+    const mediaItem: MediaItem = {
+        id: item.id,
+        media_type,
+        media_url: media_type === 'VIDEO' && item.video_versions?.length ? item.video_versions[0].url : item.image_versions2.candidates[0].url,
+        permalink: `https://www.instagram.com/p/${item.code}/`,
+        thumbnail_url: item.image_versions2.candidates[0].url,
+        timestamp: new Date(item.taken_at * 1000).toISOString(),
+        username: item.user.username,
+        caption: item.caption?.text || '',
+        children,
+        likes: item.like_count || 0,
+        comments: item.comment_count || 0
+    };
+
+    return mediaItem;
+}
+
+export { peek, peekPost };
