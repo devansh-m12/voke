@@ -20,12 +20,18 @@ importers:
       next:
         specifier: 15.3.4
         version: 15.3.4(@babel/core@7.27.7)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      oauth-1.0a:
+        specifier: ^2.2.6
+        version: 2.2.6
       react:
         specifier: ^19.0.0
         version: 19.1.0
       react-dom:
         specifier: ^19.0.0
         version: 19.1.0(react@19.1.0)
+      twitter-api-v2:
+        specifier: ^1.24.0
+        version: 1.24.0
     devDependencies:
       '@eslint/eslintrc':
         specifier: ^3
@@ -2690,6 +2696,9 @@ packages:
   nwsapi@2.2.20:
     resolution: {integrity: sha512-/ieB+mDe4MrrKMT8z+mQL8klXydZWGR5Dowt4RAGKbJ3kIGEx3X4ljUo+6V73IXtUPWgfOlU5B9MlGxFO5T+cA==}
 
+  oauth-1.0a@2.2.6:
+    resolution: {integrity: sha512-6bkxv3N4Gu5lty4viIcIAnq5GbxECviMBeKR3WX/q87SPQ8E8aursPZUtsXDnxCs787af09WPRBLqYrf/lwoYQ==}
+
   oauth-sign@0.9.0:
     resolution: {integrity: sha512-fexhUFFPTGV8ybAtSIGbV6gOkSv8UtRbDBnAyLQw4QPKkgNlsH2ByPGtMUqdWkos6YCRmAqViwgZrJc/mRDzZQ==}
 
@@ -3320,6 +3329,9 @@ packages:
 
   tweetnacl@0.14.5:
     resolution: {integrity: sha512-KXXFFdAbFXY4geFIwoyNK+f5Z1b7swfXABfL7HXCmoIWMKU3dmS26672A4EeQtDzLKy7SXmfBu51JolvEKwtGA==}
+
+  twitter-api-v2@1.24.0:
+    resolution: {integrity: sha512-RDEiuNwnFirvf4c5f1sysgg0rfMQgekXgKt+/UdbNu+Bs5bJ1VbXkqKzdd2a2lPMlDVDbdGUoe2pOd4n25fFVQ==}
 
   type-check@0.4.0:
     resolution: {integrity: sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==}
@@ -6702,6 +6714,8 @@ snapshots:
 
   nwsapi@2.2.20: {}
 
+  oauth-1.0a@2.2.6: {}
+
   oauth-sign@0.9.0: {}
 
   object-assign@4.1.1: {}
@@ -7424,6 +7438,8 @@ snapshots:
       safe-buffer: 5.2.1
 
   tweetnacl@0.14.5: {}
+
+  twitter-api-v2@1.24.0: {}
 
   type-check@0.4.0:
     dependencies:

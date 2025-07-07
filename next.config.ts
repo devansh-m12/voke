@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  serverExternalPackages: ['twitter-api-v2'],
   webpack: (config, { isServer }) => {
     if (isServer) {
       // Exclude native modules from bundling on the server side

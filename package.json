@@ -13,8 +13,10 @@
     "instagram-id-to-url-segment": "^0.0.0",
     "instagram-private-api": "^1.46.1",
     "next": "15.3.4",
+    "oauth-1.0a": "^2.2.6",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "twitter-api-v2": "^1.24.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
